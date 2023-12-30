@@ -1,0 +1,57 @@
+import random
+from sympy import mod_inverse, isprime
+
+def generate_keypair(q):
+    if not isprime(q):
+        raise ValueError("Input 'q' must be a prime number.")
+    alpha = find_primitive_root(q)
+    x = random.randint(2, q - 2)
+    beta = pow(alpha, x, q)
+    return (q, alpha, beta), x
+
+def find_primitive_root(q):
+    for alpha in range(2, q):
+        if all(pow(alpha, ((q - 1) // p), q) != 1 for p in get_prime_factors(q - 1)):
+            return alpha
+
+def get_prime_factors(n):
+    factors = []
+    i = 2
+    while i * i <= n:
+        if n % i:
+            i += 1
+        else:
+            n //= i
+            factors.append(i)
+    if n > 1:
+        factors.append(n)
+    return factors
+
+def elgamal_encrypt(plaintext, public_key):
+    q, alpha, beta = public_key
+    k = random.randint(2, q - 2)
+    s = pow(beta, k, q)
+    c1 = pow(alpha, k, q)
+    c2 = (plaintext * s) % q
+    return c1, c2
+
+def elgamal_decrypt(ciphertext, public_key, private_key):
+    q, _, _ = public_key
+    x = private_key
+    c1, c2 = ciphertext
+    s = pow(c1, x, q)
+    s_inv = mod_inverse(s, q)
+    plaintext = (c2 * s_inv) % q
+    return plaintext
+
+# Example:
+q = 23  # A prime number
+public_key, private_key = generate_keypair(q)
+
+plaintext = 14
+ciphertext = elgamal_encrypt(plaintext, public_key)
+decrypted_text = elgamal_decrypt(ciphertext, public_key, private_key)
+
+print(f"Plaintext: {plaintext}")
+print(f"Ciphertext: {ciphertext}")
+print(f"Decrypted Text: {decrypted_text}")
