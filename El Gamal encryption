@@ -1,6 +1,32 @@
 import random
-from sympy import mod_inverse, isprime
 
+def isprime(n):
+    """Check if a number is prime."""
+    if n <= 1:
+        return False
+    elif n == 2:
+        return True
+    elif n % 2 == 0:
+        return False
+
+    # Check odd factors up to the square root of n
+    for i in range(3, int(n**0.5) + 1, 2):
+        if n % i == 0:
+            return False
+
+    return True
+    
+def mod_inverse(a, m):
+    """Calculate the modular multiplicative inverse of 'a' modulo 'm'."""
+    m0, x0, x1 = m, 0, 1
+
+    while a > 1:
+        q = a // m
+        m, a = a % m, m
+        x0, x1 = x1 - q * x0, x0
+
+    return x1 + m0 if x1 < 0 else x1
+    
 def generate_keypair(q):
     if not isprime(q):
         raise ValueError("Input 'q' must be a prime number.")
